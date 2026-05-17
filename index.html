@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>goit-js-hw-11</title>
+
+  <script>
+    if (typeof global === 'undefined') {
+      var global = window;
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <script type="module" crossorigin src="/goit-js-hw-12/assets/index-DtrGJaVW.js"></script>
+  <link rel="stylesheet" crossorigin href="/goit-js-hw-12/assets/index-B64eq5Cl.css">
+</head>
+
+<body>
+
+<div id="form">
+
+<form id="search-form" class="search-container">
+
+<input
+type="text"
+id="search-input"
+name="query"
+placeholder="Search images..."
+autocomplete="off"
+/>
+
+<button type="submit">Search</button>
+
+</form>
+
+<span class="loader is-hidden">Loading images...</span>
+
+<ul class="gallery"></ul>
+
+</div>
+
+
+</body>
+</html>
