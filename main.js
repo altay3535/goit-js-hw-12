@@ -1,46 +1,55 @@
-import axios from 'axios';
+import axios from "axios";
+import "./styles.css";
 
-import './styles.css';
-
-import SimpleLightbox from 'simplelightbox';
-import 'simplelightbox/dist/simple-lightbox.min.css';
+import SimpleLightbox from "simplelightbox";
+import "simplelightbox/dist/simple-lightbox.min.css";
 
 import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
 
-// ELEMENT SEÇİCİLER
-const searchForm = document.querySelector('#search-form');
-const gallery = document.querySelector('.gallery');
-const loader = document.querySelector('.loader');
+// ELEMENTLER
+const searchForm = document.querySelector("#search-form");
+const gallery = document.querySelector(".gallery");
+const loader = document.querySelector(".loader");
+const loadMoreBtn = document.querySelector(".load-more");
+
+// STATE
+let page = 1;
+let query = "";
+let totalPages = 0;
 
 // LIGHTBOX
-const lightbox = new SimpleLightbox('.gallery a', {
-  captionsData: 'alt',
+const lightbox = new SimpleLightbox(".gallery a", {
+  captionsData: "alt",
   captionDelay: 250,
   overlayOpacity: 0.8,
   showCounter: true,
 });
 
 // API
-function fetchImages(userInput) {
-  const API_KEY = '9502846-e36776c567c382242bf5ffcec';
+async function fetchImages(userInput, page = 1) {
+  const API_KEY = "9502846-e36776c567c382242bf5ffcec";
 
-  const url = `https://pixabay.com/api/?key=${API_KEY}&q=${encodeURIComponent(
-    userInput
-  )}&image_type=photo&orientation=horizontal&safesearch=true`;
-
-  return fetch(url).then(response => {
-    if (!response.ok) throw new Error(response.status);
-    return response.json();
+  const response = await axios.get("https://pixabay.com/api/", {
+    params: {
+      key: API_KEY,
+      q: userInput,
+      image_type: "photo",
+      orientation: "horizontal",
+      safesearch: true,
+      page,
+      per_page: 40,
+    },
   });
+
+  return response.data;
 }
 
-// GALERİYE YAZDIR
+// RENDER
 function renderImages(images) {
-
   const markup = images
-    .map(image => {
-      return `
+    .map(
+      (image) => `
       <li class="gallery-item">
         <a class="gallery-link" href="${image.largeImageURL}">
           <img
@@ -57,53 +66,90 @@ function renderImages(images) {
           <p><b>Downloads</b> ${image.downloads}</p>
         </div>
       </li>
-    `;
-    })
-    .join('');
+    `
+    )
+    .join("");
 
-  gallery.innerHTML = markup;
-
+  gallery.insertAdjacentHTML("beforeend", markup);
   lightbox.refresh();
 }
 
-// FORM SUBMIT
-searchForm.addEventListener('submit', event => {
+// SUBMIT
+searchForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const query = event.target.elements.query.value.trim();
+  query = event.target.elements.query.value.trim();
+  page = 1;
+  gallery.innerHTML = "";
+  loadMoreBtn.classList.add("is-hidden");
 
   if (!query) {
     iziToast.warning({
       message: "Please enter a search query.",
-      position: 'topRight',
+      position: "topRight",
     });
     return;
   }
 
-  loader.classList.remove('is-hidden');
-  gallery.innerHTML = '';
+  loader.classList.remove("is-hidden");
 
-  fetchImages(query)
-    .then(data => {
+  try {
+    const data = await fetchImages(query, page);
 
-      if (data.hits.length === 0) {
-        iziToast.error({
-          message:
-            "Sorry, there are no images matching your search query. Please try again!",
-          position: 'topRight',
-        });
-        return;
-      }
+    if (data.hits.length === 0) {
+      iziToast.error({
+        message: "No images found!",
+        position: "topRight",
+      });
+      return;
+    }
 
-      renderImages(data.hits);
-    })
+    totalPages = Math.ceil(data.totalHits / 40);
 
-    .catch(err => {
-      console.log("API Error:", err);
-    })
+    renderImages(data.hits);
 
-    .finally(() => {
-      loader.classList.add('is-hidden');
-      searchForm.reset();
+    if (page < totalPages) {
+      loadMoreBtn.classList.remove("is-hidden");
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    loader.classList.add("is-hidden");
+    searchForm.reset();
+  }
+});
+
+// LOAD MORE
+loadMoreBtn.addEventListener("click", async () => {
+  page++;
+
+  if (page > totalPages) {
+    loadMoreBtn.classList.add("is-hidden");
+
+    iziToast.info({
+      message: "We're sorry, but you've reached the end of search results",
+      position: "topRight",
     });
+
+    return;
+  }
+
+  try {
+    const data = await fetchImages(query, page);
+
+    renderImages(data.hits);
+
+    lightbox.refresh();
+
+    if (page >= totalPages) {
+      loadMoreBtn.classList.add("is-hidden");
+
+      iziToast.info({
+        message: "You've reached the end of results",
+        position: "topRight",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
 });
