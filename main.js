@@ -12,6 +12,8 @@ const searchForm = document.querySelector("#search-form");
 const gallery = document.querySelector(".gallery");
 const loader = document.querySelector(".loader");
 const loadMoreBtn = document.querySelector(".load-more");
+const loadText = document.querySelector(".load-text");
+
 
 // STATE
 let page = 1;
@@ -82,6 +84,7 @@ searchForm.addEventListener("submit", async (event) => {
   page = 1;
   gallery.innerHTML = "";
   loadMoreBtn.classList.add("is-hidden");
+  loadText.style.display = "none";
 
   if (!query) {
     iziToast.warning({
@@ -119,21 +122,14 @@ searchForm.addEventListener("submit", async (event) => {
   }
 });
 
-const loadText = document.querySelector(".load-text");
+
 
 // LOAD MORE
 loadMoreBtn.addEventListener("click", async () => {
 
-  loadText.classList.remove("is-hidden");
-
-  await new Promise(resolve => setTimeout(resolve, 1000)); // 1 saniye loading
-
-  page++;
-
-  if (page > totalPages) {
+  if (page >= totalPages) {
+    loadText.style.display = "block";
     loadMoreBtn.classList.add("is-hidden");
-
-    loadText.classList.add("is-hidden");
 
     iziToast.info({
       message: "We're sorry, but you've reached the end of search results",
@@ -142,6 +138,11 @@ loadMoreBtn.addEventListener("click", async () => {
 
     return;
   }
+
+  loadText.classList.remove("is-hidden");
+  loadMoreBtn.classList.add("is-hidden");
+
+  page++;
 
   try {
     const data = await fetchImages(query, page);
@@ -157,9 +158,13 @@ loadMoreBtn.addEventListener("click", async () => {
       behavior: "smooth",
     });
 
+    if (page < totalPages) {
+      loadMoreBtn.classList.remove("is-hidden");
+    }
+
   } catch (error) {
     console.log(error);
+  } finally {
+    loadText.classList.add("is-hidden");
   }
-
-  loadText.classList.add("is-hidden");
 });

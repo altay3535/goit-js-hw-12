@@ -177,3 +177,12 @@ body {
 .is-hidden {
   display: none;
 }
+
+.load-text {
+  text-align: center;
+  margin: 20px auto;
+  display: block;
+}
+.load-text {
+  display: none;
+}
