@@ -119,12 +119,21 @@ searchForm.addEventListener("submit", async (event) => {
   }
 });
 
+const loadText = document.querySelector(".load-text");
+
 // LOAD MORE
 loadMoreBtn.addEventListener("click", async () => {
+
+  loadText.classList.remove("is-hidden");
+
+  await new Promise(resolve => setTimeout(resolve, 1000)); // 1 saniye loading
+
   page++;
 
   if (page > totalPages) {
     loadMoreBtn.classList.add("is-hidden");
+
+    loadText.classList.add("is-hidden");
 
     iziToast.info({
       message: "We're sorry, but you've reached the end of search results",
@@ -138,18 +147,19 @@ loadMoreBtn.addEventListener("click", async () => {
     const data = await fetchImages(query, page);
 
     renderImages(data.hits);
-
     lightbox.refresh();
 
-    if (page >= totalPages) {
-      loadMoreBtn.classList.add("is-hidden");
+    const cards = document.querySelectorAll(".gallery-item");
+    const cardHeight = cards[0].getBoundingClientRect().height;
 
-      iziToast.info({
-        message: "You've reached the end of results",
-        position: "topRight",
-      });
-    }
+    window.scrollBy({
+      top: cardHeight * 2,
+      behavior: "smooth",
+    });
+
   } catch (error) {
     console.log(error);
   }
+
+  loadText.classList.add("is-hidden");
 });

@@ -76,8 +76,9 @@ body {
   font-size: 16px;
   line-height: 1.4em;
   letter-spacing: 0.04em;
-
 }
+
+
 
 .search-container button:hover {
   background-color: #6C8CFF;
@@ -154,4 +155,25 @@ body {
   align-items: center; 
   gap: 7px; 
   margin: 0;
+}
+
+.load-more {
+  width: 125px;
+  height: 40px;
+  display: block;
+  margin: auto;
+  cursor: pointer;
+  background-color: #4E75FF;
+  border-radius: 6px;
+  border: #4E75FF;
+
+  color: #FFFFFF;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.4em;
+  letter-spacing: 0.04em;
+}
+
+.is-hidden {
+  display: none;
 }
